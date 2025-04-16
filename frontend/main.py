@@ -21,7 +21,7 @@ if video_file:
         payload = {"video_data": encoded_video}
 
         with st.spinner("Processing..."):
-            res = requests.post("http://backend:8000/process", json=payload)
+            res = requests.post("http://localhost:8000/process", json=payload)
             if res.status_code == 200:
                 result = res.json()
                 st.subheader("Motion Speed Results")

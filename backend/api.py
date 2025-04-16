@@ -108,3 +108,4 @@ async def process_video(data: VideoData):
         "avg_speed": float(np.mean(all_speed)),
         "frame": img_b64
     })
+
