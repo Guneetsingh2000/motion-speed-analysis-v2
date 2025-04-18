@@ -1,13 +1,24 @@
 version: "3.9"
+
 services:
-  frontend:
-    build: ./frontend
+  backend:
+    build:
+      context: ./backend
+    container_name: motion-backend
     ports:
-      - "8501:8501"
+      - "8000:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: motion-frontend
+    ports:
+      - "8501:8080"
+    environment:
+      - BACKEND_URL=http://backend:8080
     depends_on:
       - backend
 
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
+
+
+

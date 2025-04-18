@@ -1,39 +1,6 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
-import base64
-import numpy as np
 import cv2
-import tempfile
-import os
-
-app = FastAPI()
-
-class VideoRequest(BaseModel):
-    video_data: str
-    option: int
-    blur: int
-    hist_eq: bool
-    canny: bool
-
-@app.get("/")
-def root():
-    return {"message": "Backend is running!"}
-
-@app.post("/process")
-def analyze_motion(req: VideoRequest):
-    try:
-        video_bytes = base64.b64decode(req.video_data)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-            temp_file.write(video_bytes)
-            temp_path = temp_file.name
-
-        result = process_video(temp_path, req.option, req.blur, req.hist_eq, req.canny)
-        os.remove(temp_path)
-
-        return JSONResponse(result)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+import numpy as np
+import base64
 
 def encode_image(img):
     _, buffer = cv2.imencode('.jpg', img)
@@ -49,14 +16,7 @@ def preprocess(frame, blur=5, hist_eq=True, canny=False):
         gray = cv2.Canny(gray, 50, 150)
     return gray
 
-def process_video(video_path, option, blur, hist_eq, canny):
-    cap = cv2.VideoCapture(video_path)
-    success, frame = cap.read()
-    cap.release()
-
-    if not success or frame is None:
-        raise ValueError("Could not read video frame.")
-
+def process_video(frame, option, blur, hist_eq, canny):
     height, width, _ = frame.shape
     vis = frame.copy()
     speed = 0
@@ -84,5 +44,3 @@ def process_video(video_path, option, blur, hist_eq, canny):
         "min_speed": speed / 4,
         "overlay_frame": encode_image(vis)
     }
-
-    
